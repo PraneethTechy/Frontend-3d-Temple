@@ -1,9 +1,19 @@
 /**
- * DevaSetu Backend API Client
+ * DevaSetu Backend API Configuration & Health Client
+ * Centralized API base URL using Vite environment variables.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:5000'
+).replace(/\/$/, '');
 
+export default API_BASE_URL;
+
+/**
+ * Checks backend health endpoint
+ */
 export async function checkBackendHealth() {
   try {
     const response = await fetch(`${API_BASE_URL}/api/health`);

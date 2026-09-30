@@ -424,7 +424,16 @@ export class SimulationEngine {
     }
 
     // 7. Advance Position towards target waypoint with continuous delta-time
-    const step = agent.actualSpeed * dt;
+    let step = agent.actualSpeed * dt;
+    if (aheadAgent) {
+      const distToAhead = getDistance2D(agent.position, aheadAgent.position);
+      const safeBuffer = this.options.MIN_QUEUE_SPACING;
+      if (distToAhead <= safeBuffer) {
+        step = 0;
+      } else {
+        step = Math.min(step, Math.max(0, distToAhead - safeBuffer));
+      }
+    }
 
     if (step > 0.0001) {
       if (distToTarget <= step) {

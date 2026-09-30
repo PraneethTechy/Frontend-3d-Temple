@@ -1,15 +1,17 @@
 /**
  * DevaSetu AI Client Service
  * Communicates with backend Express endpoints for AI spatial layout generation & optimization.
- * Never stores or transmits API keys from the browser.
+ * Uses centralized API_BASE_URL. Never stores or transmits API keys from the browser.
  */
+
+import { API_BASE_URL } from '../../lib/api.js';
 
 /**
  * Checks backend AI service status
  */
 export async function checkAiServiceStatus() {
   try {
-    const res = await fetch('/api/ai/status');
+    const res = await fetch(`${API_BASE_URL}/api/ai/status`);
     if (!res.ok) throw new Error('Status check failed');
     return await res.json();
   } catch (err) {
@@ -22,7 +24,7 @@ export async function checkAiServiceStatus() {
  */
 export async function requestAiLayout({ scene, prompt = '', mode = 'generate', allowFallback = true }) {
   try {
-    const res = await fetch('/api/ai/layout', {
+    const res = await fetch(`${API_BASE_URL}/api/ai/layout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
