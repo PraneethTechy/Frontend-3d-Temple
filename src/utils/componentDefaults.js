@@ -14,6 +14,8 @@ export const COMPONENT_TYPES = {
   MAIN_GOPURAM: 'main_gopuram',
   DARSHAN_SANCTUM: 'darshan_sanctum',
   TEMPLE_GATEWAY: 'temple_gateway',
+  MANDAPAM: 'mandapam',
+  PRAKARAM_WALL: 'prakaram_wall',
 
   // Crowd Management Infrastructure
   ENTRANCE: 'entrance',
@@ -34,7 +36,7 @@ export const COMPONENT_METADATA = {
     icon: 'Landmark',
     description: 'Ceremonial Dravidian entrance gateway tower with stepped pyramidal tiers, central portal & golden kalasams',
     defaultDimensions: { length: 16, width: 8, height: 18 },
-    defaultProperties: { tiers: 5, archWidth: 5, archHeight: 4.5, kalasams: 5, stoneColor: '#BFA382' },
+    defaultProperties: { tiers: 5, archWidth: 5, archHeight: 4.5, kalasams: 5, stoneColor: '#9CA3AF' },
   },
   [COMPONENT_TYPES.MAIN_GOPURAM]: {
     name: 'Main Gopuram',
@@ -43,16 +45,16 @@ export const COMPONENT_METADATA = {
     icon: 'Crown',
     description: 'Majestic Raja Gopuram landmark marking the threshold to the sacred inner temple sanctum',
     defaultDimensions: { length: 22, width: 12, height: 32 },
-    defaultProperties: { tiers: 7, archWidth: 6, archHeight: 6.5, kalasams: 7, stoneColor: '#9C7A5B' },
+    defaultProperties: { tiers: 7, archWidth: 6, archHeight: 6.5, kalasams: 7, stoneColor: '#9CA3AF' },
   },
   [COMPONENT_TYPES.DARSHAN_SANCTUM]: {
     name: 'Darshan Sanctum',
     shortName: 'SANCTUM',
     category: COMPONENT_CATEGORIES.ARCHITECTURE,
     icon: 'Sparkles',
-    description: 'Sacred Garbhagriha with layered Vimana tower, pillared Mukha Mandapam & diya illumination',
-    defaultDimensions: { length: 18, width: 14, height: 12 },
-    defaultProperties: { vimanaHeight: 12, sanctumPillars: 10, diyaGlow: true, deity: 'Sri Ganesha' },
+    description: 'Sacred Garbhagriha with Shiva Lingam, Yoni-Peetham, Prabhavali arch, Nandi, Vimana tower & diya illumination',
+    defaultDimensions: { length: 18, width: 14, height: 14 },
+    defaultProperties: { vimanaHeight: 14, sanctumPillars: 10, diyaGlow: true, showNandi: true, showPrabhavali: true, deity: 'Arunachaleswarar Shiva Lingam', stoneColor: '#9CA3AF' },
   },
   [COMPONENT_TYPES.TEMPLE_GATEWAY]: {
     name: 'Temple Gateway',
@@ -62,6 +64,24 @@ export const COMPONENT_METADATA = {
     description: 'Ceremonial pillared Mandapam pavilion gateway connecting temple crowd corridors',
     defaultDimensions: { length: 10, width: 6, height: 7 },
     defaultProperties: { pillars: 4, archHeight: 4.5 },
+  },
+  [COMPONENT_TYPES.MANDAPAM]: {
+    name: 'Mandapam',
+    shortName: 'MANDAPAM',
+    category: COMPONENT_CATEGORIES.ARCHITECTURE,
+    icon: 'Building2',
+    description: 'Authentic Dravidian carved pillared hall pavilion for temple ceremonies and queue movement',
+    defaultDimensions: { length: 16, width: 12, height: 6 },
+    defaultProperties: { pillarSpacing: 3.5, stoneColor: '#9CA3AF' },
+  },
+  [COMPONENT_TYPES.PRAKARAM_WALL]: {
+    name: 'Prakaram Wall',
+    shortName: 'MADHIL',
+    category: COMPONENT_CATEGORIES.ARCHITECTURE,
+    icon: 'Shield',
+    description: 'Colossal granite enclosure wall (Madhil) bounding sacred temple prakaram courtyards',
+    defaultDimensions: { length: 20, width: 2.4, height: 5.6 },
+    defaultProperties: { thickness: 2.4, stoneColor: '#BAAA94' },
   },
 
   // --- CROWD INFRASTRUCTURE CATEGORY ---

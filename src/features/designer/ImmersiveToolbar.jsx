@@ -10,7 +10,8 @@ import {
   GitBranch, 
   Tag, 
   ChevronUp, 
-  Focus
+  Focus,
+  Flame
 } from 'lucide-react';
 import { useQueueStore } from '../../store/useQueueStore.js';
 import { useSimulationStore } from '../simulation/simulationStore.js';
@@ -36,12 +37,18 @@ export function ImmersiveToolbar() {
   const showLabels = useQueueStore((state) => state.showLabels);
   const toggleShowLabels = useQueueStore((state) => state.toggleShowLabels);
 
-  // Simulation store state & actions
   const simStatus = useSimulationStore((state) => state.status);
   const runSimulation = useSimulationStore((state) => state.runSimulation);
   const pauseSimulation = useSimulationStore((state) => state.pauseSimulation);
   const resumeSimulation = useSimulationStore((state) => state.resumeSimulation);
   const scene = useQueueStore((state) => state.scene);
+
+  const handleFocus3DToggle = () => {
+    toggleImmersive();
+    setTimeout(() => {
+      focusCamera('overview');
+    }, 40);
+  };
 
   const [showPresetsMenu, setShowPresetsMenu] = useState(false);
 
@@ -72,88 +79,104 @@ export function ImmersiveToolbar() {
               setShowPresetsMenu(false);
             }}
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-stone-200 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-            title="Overview of all 4 perimeter gopurams and Main Temple"
+            title="Overview of the entire temple campus"
           >
             <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
             <span>1. OVERVIEW</span>
           </button>
 
-          {/* 2. NORTH ENTRANCE */}
+          {/* 2. ENTRANCE */}
           <button
-            id="btn-preset-north"
+            id="btn-preset-entrance"
             onClick={() => {
-              focusCamera('north_entrance');
+              focusCamera('entrance');
               setShowPresetsMenu(false);
             }}
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus North Entrance Gopuram"
+            title="Entrance Gopuram and arrival forecourt"
           >
-            <span>🛕 2. NORTH</span>
+            <span>🛕 2. ENTRANCE</span>
           </button>
 
-          {/* 3. WEST ENTRANCE */}
+          {/* 3. QUEUE */}
           <button
-            id="btn-preset-west"
+            id="btn-preset-queue"
             onClick={() => {
-              focusCamera('west_entrance');
+              focusCamera('queue');
               setShowPresetsMenu(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-sky-300 hover:text-sky-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus West Entrance Gopuram"
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Queue lanes and devotee movement"
           >
-            <span>🛕 3. WEST</span>
+            <span>🚶 3. QUEUE</span>
           </button>
 
-          {/* 4. EAST ENTRANCE */}
+          {/* 4. DARSHAN VIEW */}
           <button
-            id="btn-preset-east"
+            id="btn-preset-darshan"
             onClick={() => {
-              focusCamera('east_entrance');
+              focusCamera('darshan_view');
               setShowPresetsMenu(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-purple-300 hover:text-purple-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus East Entrance Gopuram"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/25 border border-amber-400/60 hover:bg-amber-500/35 text-amber-300 transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+            title="Close view of incoming queue, sanctum portal & sacred deity"
           >
-            <span>🛕 4. EAST</span>
+            <span>✨ 4. DARSHAN VIEW</span>
           </button>
 
-          {/* 5. MAIN DARSHAN */}
+          {/* 5. DARSHAN INTERIOR */}
+          <button
+            id="btn-preset-darshan-interior"
+            onClick={() => {
+              focusCamera('darshan_interior');
+              setShowPresetsMenu(false);
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 border border-amber-300/80 hover:bg-amber-600/40 text-amber-200 transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+            title="Devotee eye-level experience inside the sacred approach and sanctum"
+          >
+            <Flame className="w-3.5 h-3.5 text-amber-300" />
+            <span>🪔 5. DARSHAN INTERIOR</span>
+          </button>
+
+          {/* 6. SIMULATION */}
+          <button
+            id="btn-preset-simulation"
+            onClick={() => {
+              focusCamera('simulation');
+              setShowPresetsMenu(false);
+            }}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Simulation operational overview"
+          >
+            <span>⚡ 6. SIMULATION</span>
+          </button>
+
+          <div className="w-[1px] h-4 bg-stone-700 mx-1" />
+
+          {/* Additional Gopurams */}
           <button
             id="btn-preset-main"
             onClick={() => {
               focusCamera('main_darshan');
               setShowPresetsMenu(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 text-amber-300 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Majestic view of Central Main Raja Gopuram"
+            className="px-2 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-amber-400 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Majestic Central Raja Gopuram"
           >
-            <span>👑 5. MAIN DARSHAN</span>
+            <span>👑 RAJA GOPURAM</span>
           </button>
 
-          {/* 6. DARSHAN SANCTUM */}
-          <button
-            id="btn-preset-sanctum"
-            onClick={() => {
-              focusCamera('darshan_sanctum');
-              setShowPresetsMenu(false);
-            }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-800/80 hover:bg-stone-700 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus on Inner Garbhagriha Sanctum"
-          >
-            <span>🛕 6. SANCTUM</span>
-          </button>
-
-          {/* 7. SOUTH EXIT */}
+          {/* SOUTH EXIT */}
           <button
             id="btn-preset-south"
             onClick={() => {
               focusCamera('south_exit');
               setShowPresetsMenu(false);
             }}
-            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus South Exit Gopuram"
+            className="px-2 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title="South Exit Gopuram"
           >
-            <span>🚪 7. SOUTH EXIT</span>
+            <span>🚪 SOUTH EXIT</span>
           </button>
 
           {/* 8. SELECTED COMPONENT */}
@@ -300,7 +323,7 @@ export function ImmersiveToolbar() {
         {/* GROUP 5: FOCUS [Focus 3D (F)] (Point 16) */}
         <button
           id={isImmersive ? "btn-exit-immersive" : "btn-toolbar-focus-3d"}
-          onClick={toggleImmersive}
+          onClick={handleFocus3DToggle}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
             isImmersive
               ? 'bg-stone-800 text-stone-200 border border-stone-600 hover:bg-stone-700 hover:text-white'

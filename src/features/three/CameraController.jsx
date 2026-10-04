@@ -15,7 +15,7 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
   const controlsRef = useRef();
   const isTransforming = useQueueStore((state) => state.isTransforming);
   const cameraFocusTarget = useQueueStore((state) => state.cameraFocusTarget);
-  const scene = useQueueStore((state) => state.scene);
+  const components = useQueueStore((state) => state.scene?.components || []);
   const selectedComponentId = useQueueStore((state) => state.selectedComponentId);
 
   const lengthMeters = toMeters(length, unit);
@@ -68,55 +68,70 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
     return [0, maxDim * 2.2, 0.001]; // Slight Z offset for up-vector stability
   };
 
-  // Render loop hook for smooth cinematic camera interpolation
+  const isFirstMountRef = useRef(true);
+  const lastTargetTimestampRef = useRef(0);
+
+  // Render loop hook: Always update OrbitControls damping + interpolate animations
   useFrame((_, delta) => {
-    if (!animRef.current.isAnimating || !controlsRef.current) return;
-
-    const anim = animRef.current;
-    anim.elapsed += delta;
-    const rawT = Math.min(1.0, anim.elapsed / anim.duration);
-
-    // Smooth cubic ease-in-out curve: slow start, smooth acceleration, gentle deceleration
-    const t = rawT < 0.5 ? 4 * rawT * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
-
-    _vPos.lerpVectors(anim.startPos, anim.destPos, t);
-    _vTarget.lerpVectors(anim.startTarget, anim.destTarget, t);
-
-    camera.position.copy(_vPos);
-    controlsRef.current.target.copy(_vTarget);
-
-    if (camera.isOrthographicCamera && anim.destZoom) {
-      camera.zoom = THREE.MathUtils.lerp(anim.startZoom, anim.destZoom, t);
-      camera.updateProjectionMatrix();
-    }
-
-    controlsRef.current.update();
-    invalidate();
-
-    if (rawT >= 1.0) {
-      anim.isAnimating = false;
-      controlsRef.current.target.copy(anim.destTarget);
-      camera.position.copy(anim.destPos);
-      controlsRef.current.update();
-    }
-  });
-
-  // Cancel animation immediately if user manually interacts with controls
-  useEffect(() => {
     const controls = controlsRef.current;
     if (!controls) return;
 
-    const handleUserStart = () => {
+    if (animRef.current.isAnimating) {
+      const anim = animRef.current;
+      anim.elapsed += delta;
+      const rawT = Math.min(1.0, anim.elapsed / anim.duration);
+
+      // Quintic smoothstep curve: 6t^5 - 15t^4 + 10t^3 (smoothest derivative, zero jerk)
+      const t = rawT * rawT * rawT * (rawT * (rawT * 6 - 15) + 10);
+
+      _vPos.lerpVectors(anim.startPos, anim.destPos, t);
+      _vTarget.lerpVectors(anim.startTarget, anim.destTarget, t);
+
+      camera.position.copy(_vPos);
+      controls.target.copy(_vTarget);
+
+      if (camera.isOrthographicCamera && anim.destZoom) {
+        camera.zoom = THREE.MathUtils.lerp(anim.startZoom, anim.destZoom, t);
+        camera.updateProjectionMatrix();
+      }
+
+      controls.update();
+
+      if (rawT >= 1.0) {
+        anim.isAnimating = false;
+        controls.target.copy(anim.destTarget);
+        camera.position.copy(anim.destPos);
+        controls.update();
+      }
+    } else {
+      // Continuously update OrbitControls for smooth inertia, damping, and zero-stutter rotation
+      controls.update();
+    }
+  });
+
+  // Cancel animation immediately on ANY user input (drag, click, or wheel scroll)
+  useEffect(() => {
+    const dom = gl.domElement;
+    if (!dom) return;
+
+    const handleUserInterrupt = () => {
       if (animRef.current.isAnimating) {
         animRef.current.isAnimating = false;
       }
     };
 
-    controls.addEventListener('start', handleUserStart);
-    return () => controls.removeEventListener('start', handleUserStart);
-  }, []);
+    dom.addEventListener('pointerdown', handleUserInterrupt, { passive: true });
+    dom.addEventListener('wheel', handleUserInterrupt, { passive: true });
+    dom.addEventListener('touchstart', handleUserInterrupt, { passive: true });
 
-  // Handle Camera Mode Changes & Reset Triggers
+    return () => {
+      dom.removeEventListener('pointerdown', handleUserInterrupt);
+      dom.removeEventListener('wheel', handleUserInterrupt);
+      dom.removeEventListener('touchstart', handleUserInterrupt);
+    };
+  }, [gl]);
+
+  // Handle Camera Mode Changes & Reset Triggers ONLY (Never on resize or render)
   useEffect(() => {
     if (!controlsRef.current) return;
 
@@ -145,16 +160,20 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
     }
 
     controls.update();
-    invalidate();
-  }, [cameraMode, resetCount, calculateFitOverview, maxDim, camera, invalidate]);
+  }, [cameraMode, resetCount]); // STRICT DEPENDENCIES: Only run when mode switches or user clicks Reset!
 
   // Handle Professional Contextual Camera Presets with Smooth Gliding Transitions
   useEffect(() => {
     if (!controlsRef.current || !cameraFocusTarget) return;
 
+    // Prevent duplicate re-execution from state/prop changes
+    if (cameraFocusTarget.timestamp && cameraFocusTarget.timestamp === lastTargetTimestampRef.current) {
+      return;
+    }
+    lastTargetTimestampRef.current = cameraFocusTarget.timestamp || Date.now();
+
     const controls = controlsRef.current;
     const { preset, targetComponentId } = cameraFocusTarget;
-    const components = scene.components || [];
 
     let destPos = null;
     let destTarget = null;
@@ -167,56 +186,132 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
       destPos = fit.position;
       destZoom = fit.orthoZoom;
     }
-    // 2. NORTH ENTRANCE GOPURAM (Arrival plaza & holding forecourt)
-    else if (preset === 'north_entrance' || preset === 'focus_north_gopuram' || preset === 'focus_entrance_gopuram') {
+    // 2. ENTRANCE VIEW (Arrival plaza, holding forecourt & North Gopuram)
+    else if (
+      preset === 'entrance' ||
+      preset === 'entrance_view' ||
+      preset === 'north_entrance' ||
+      preset === 'focus_north_gopuram' ||
+      preset === 'focus_entrance_gopuram'
+    ) {
       const gopuram = components.find(
         (c) => c.role === 'north-gopuram' || c.type === COMPONENT_TYPES.ENTRANCE_GOPURAM || c.type === COMPONENT_TYPES.ENTRANCE
       );
       if (gopuram) {
-        destTarget = new THREE.Vector3(gopuram.position.x, 8, gopuram.position.z);
-        destPos = new THREE.Vector3(gopuram.position.x - 22, 20, gopuram.position.z + 32);
+        // Positioned outside North Gopuram looking directly South through the open gateway into the inner courtyard, security, and queue lines beyond
+        destPos = new THREE.Vector3(gopuram.position.x - 4, 11, gopuram.position.z - 30);
+        destTarget = new THREE.Vector3(gopuram.position.x, 3.2, gopuram.position.z + 24);
       }
     }
-    // 3. WEST ENTRANCE GOPURAM (Independent Western stream)
+    // 3. QUEUE VIEW (Focus on primary queue corridors & holding bays)
+    else if (preset === 'queue' || preset === 'queue_view') {
+      const queueComps = components.filter((c) => c.type === COMPONENT_TYPES.QUEUE);
+      if (queueComps.length > 0) {
+        let avgX = 0, avgZ = 0;
+        queueComps.forEach((q) => { avgX += q.position.x; avgZ += q.position.z; });
+        avgX /= queueComps.length;
+        avgZ /= queueComps.length;
+        destTarget = new THREE.Vector3(avgX, 2.5, avgZ);
+        destPos = new THREE.Vector3(avgX - 26, 22, avgZ + 32);
+      } else {
+        const fit = calculateFitOverview();
+        destTarget = fit.target;
+        destPos = fit.position;
+      }
+    }
+    // 4. SIMULATION VIEW (Dynamic operational crowd flow overview)
+    else if (preset === 'simulation' || preset === 'simulation_view') {
+      const fit = calculateFitOverview();
+      destTarget = new THREE.Vector3(0, 3.0, -10);
+      destPos = new THREE.Vector3(-fit.fitDistance * 0.24, fit.fitDistance * 0.62, fit.fitDistance * 0.72);
+    }
+    // 5. DARSHAN VIEW (Close Operational & Sacred Vista of Queue, Sanctum Portal, Shiva Deity, and Egress)
+    else if (
+      preset === 'darshan_view' ||
+      preset === 'darshan_sanctum' ||
+      preset === 'focus_darshan'
+    ) {
+      const sanctum = components.find(
+        (c) =>
+          c.type === COMPONENT_TYPES.DARSHAN_SANCTUM ||
+          c.role === 'darshan-sanctum' ||
+          c.type === COMPONENT_TYPES.DARSHAN
+      );
+      const sX = sanctum?.position?.x ?? 0;
+      const sZ = sanctum?.position?.z ?? -10;
+
+      // Positioned to clearly frame incoming devotees, darshan queue, sanctum portal & illuminated Shiva Lingam, and smooth departure
+      destTarget = new THREE.Vector3(sX, 3.5, sZ + 2.5);
+      destPos = new THREE.Vector3(sX - 16, 9.5, sZ + 18);
+    }
+    // 5b. DARSHAN INTERIOR (Devotee Human Eye-Level Experience Inside Sacred Approach & Sanctum)
+    else if (
+      preset === 'darshan_interior' ||
+      preset === 'interior_darshan' ||
+      preset === 'sanctum_interior'
+    ) {
+      const sanctum = components.find(
+        (c) =>
+          c.type === COMPONENT_TYPES.DARSHAN_SANCTUM ||
+          c.role === 'darshan-sanctum' ||
+          c.type === COMPONENT_TYPES.DARSHAN
+      );
+      const sX = sanctum?.position?.x ?? 0;
+      const sZ = sanctum?.position?.z ?? -32;
+      const sW = sanctum?.dimensions?.width ?? 18;
+
+      // Positioned at human eye-level (y: 2.2m) inside the Mandapa approach corridor
+      // Looking directly past Nandi and through the golden Torana doorway into the Garbhagriha at the Shiva Lingam
+      destTarget = new THREE.Vector3(sX, 2.1, sZ - (sW * 0.20));
+      destPos = new THREE.Vector3(sX + 1.2, 2.2, sZ + (sW * 0.42));
+    }
+    // 6. WEST ENTRANCE GOPURAM (Independent Western stream)
     else if (preset === 'west_entrance' || preset === 'focus_west_gopuram') {
       const gopuram = components.find((c) => c.role === 'west-gopuram');
       if (gopuram) {
-        destTarget = new THREE.Vector3(gopuram.position.x, 8, gopuram.position.z);
-        destPos = new THREE.Vector3(gopuram.position.x + 30, 20, gopuram.position.z + 24);
+        // Positioned outside West Gopuram looking East through open gateway into courtyard
+        destPos = new THREE.Vector3(gopuram.position.x - 30, 11, gopuram.position.z - 4);
+        destTarget = new THREE.Vector3(gopuram.position.x + 24, 3.2, gopuram.position.z);
       }
     }
-    // 4. EAST ENTRANCE GOPURAM (Independent Eastern stream)
+    // 7. EAST ENTRANCE GOPURAM (Independent Eastern stream)
     else if (preset === 'east_entrance' || preset === 'focus_east_gopuram') {
       const gopuram = components.find((c) => c.role === 'east-gopuram');
       if (gopuram) {
-        destTarget = new THREE.Vector3(gopuram.position.x, 8, gopuram.position.z);
-        destPos = new THREE.Vector3(gopuram.position.x - 30, 20, gopuram.position.z + 24);
+        // Positioned outside East Gopuram looking West through open gateway into courtyard
+        destPos = new THREE.Vector3(gopuram.position.x + 30, 11, gopuram.position.z - 4);
+        destTarget = new THREE.Vector3(gopuram.position.x - 24, 3.2, gopuram.position.z);
       }
     }
-    // 5. MAIN DARSHAN (Central Raja Gopuram & Sacred Courtyard)
+    // 8. MAIN DARSHAN GOPURAM (Central Raja Gopuram & Sacred Courtyard)
     else if (preset === 'main_darshan' || preset === 'focus_main_gopuram') {
       const gopuram = components.find((c) => c.type === COMPONENT_TYPES.MAIN_GOPURAM);
       if (gopuram) {
-        destTarget = new THREE.Vector3(gopuram.position.x, 14, gopuram.position.z);
-        destPos = new THREE.Vector3(gopuram.position.x - 34, 26, gopuram.position.z + 40);
+        destPos = new THREE.Vector3(gopuram.position.x - 22, 18, gopuram.position.z + 32);
+        destTarget = new THREE.Vector3(gopuram.position.x, 9.0, gopuram.position.z);
       }
     }
-    // 6. DARSHAN SANCTUM (Inner Sanctum Chamber & Divine Viewing Threshold)
-    else if (preset === 'darshan_sanctum' || preset === 'focus_darshan') {
-      const sanctum = components.find(
-        (c) => c.type === COMPONENT_TYPES.DARSHAN_SANCTUM || c.type === COMPONENT_TYPES.DARSHAN
-      );
-      if (sanctum) {
-        destTarget = new THREE.Vector3(sanctum.position.x, 6, sanctum.position.z);
-        destPos = new THREE.Vector3(sanctum.position.x - 24, 16, sanctum.position.z + 26);
+    // 8b. GOPURAM CLOSE-UP INSPECTION CAMERA (10-16m close inspection of tier facade, bays, niches & cornices)
+    else if (
+      preset === 'gopuram_closeup' ||
+      preset === 'gopuram_detail' ||
+      preset === 'gopuram_inspection' ||
+      preset === 'north_gopuram_closeup'
+    ) {
+      const gopuram = components.find((c) => c.role === 'north-gopuram' || c.type === COMPONENT_TYPES.ENTRANCE_GOPURAM);
+      if (gopuram) {
+        // 14 meters away, elevated at 7.5m, angled 3/4 view to clearly inspect facade relief and side articulation
+        destPos = new THREE.Vector3(gopuram.position.x - 10, 7.5, gopuram.position.z - 14);
+        destTarget = new THREE.Vector3(gopuram.position.x, 8.5, gopuram.position.z);
       }
     }
     // 7. SOUTH EXIT GOPURAM (Dedicated Post-Darshan Egress)
     else if (preset === 'south_exit' || preset === 'focus_south_gopuram') {
       const gopuram = components.find((c) => c.role === 'south-gopuram');
       if (gopuram) {
-        destTarget = new THREE.Vector3(gopuram.position.x, 8, gopuram.position.z);
-        destPos = new THREE.Vector3(gopuram.position.x - 24, 20, gopuram.position.z - 34);
+        // Positioned inside exit courtyard looking South through the open South Exit Gopuram portal
+        destPos = new THREE.Vector3(gopuram.position.x - 14, 11, gopuram.position.z - 28);
+        destTarget = new THREE.Vector3(gopuram.position.x, 3.2, gopuram.position.z + 20);
       }
     }
     // 8. SELECTED COMPONENT OR QUEUE
@@ -287,10 +382,9 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
           camera.updateProjectionMatrix();
         }
         controls.update();
-        invalidate();
       }
     }
-  }, [cameraFocusTarget, cameraMode, calculateFitOverview, maxDim, scene.components, selectedComponentId, camera, invalidate]);
+  }, [cameraFocusTarget]);
 
   return (
     <>
@@ -317,15 +411,15 @@ export function CameraController({ cameraMode, resetCount, length, width, unit }
         makeDefault
         enabled={!isTransforming}
         enableDamping
-        dampingFactor={0.06} // Buttery smooth, responsive damping
-        rotateSpeed={0.80}   // Natural rotation sensitivity
-        panSpeed={0.90}      // Responsive, natural mouse-follow pan
-        zoomSpeed={1.15}     // Responsive zoom without stepping or sluggishness
-        screenSpacePanning   // DCC standard screen-space panning
+        dampingFactor={0.065} // Buttery smooth, responsive damping
+        rotateSpeed={0.85}    // Natural rotation sensitivity
+        panSpeed={0.85}       // Responsive, natural mouse-follow pan
+        zoomSpeed={0.95}      // Smooth exponential wheel zoom without stepping or jumping
+        screenSpacePanning    // DCC standard screen-space panning
         enableRotate={cameraMode === '3d'}
         maxPolarAngle={Math.PI / 2 - 0.04} // Prevent ground plane clipping
         minPolarAngle={0.05}              // Prevent top-down gimbal lock
-        minDistance={2.5}                  // Close human & queue inspection
+        minDistance={2.0}                  // Close human & queue inspection
         maxDistance={Math.max(lengthMeters, widthMeters, 250) * 3.5}
         mouseButtons={{
           LEFT: cameraMode === '3d' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,

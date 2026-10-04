@@ -57,3 +57,39 @@ export async function requestAiLayout({ scene, prompt = '', mode = 'generate', a
     };
   }
 }
+
+/**
+ * Requests structured AI capacity expansion plan from backend
+ */
+export async function requestCapacityExpansionPlan(payload = {}) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/ai/layout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...payload,
+        mode: 'capacity_expansion',
+        allowFallback: true,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data.message || 'Capacity expansion planning is temporarily unavailable.',
+        error: data.error,
+        status: res.status,
+      };
+    }
+    return data;
+  } catch (err) {
+    return {
+      success: false,
+      message: 'Capacity expansion planning encountered a network error.',
+      error: err.message,
+    };
+  }
+}

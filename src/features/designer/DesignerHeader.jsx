@@ -337,7 +337,7 @@ export function DesignerHeader() {
 
       {/* Settings Modal */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-stone-200 shadow-elevated w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="p-5 border-b border-stone-100 flex items-center justify-between bg-deva-maroon-900 text-white">
               <div className="flex items-center gap-2">

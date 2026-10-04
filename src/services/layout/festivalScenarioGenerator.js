@@ -89,7 +89,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       archWidth: 6.0,
       archHeight: 5.2,
       kalasams: 5,
-      stoneColor: '#BFA382',
+      stoneColor: '#9CA3AF',
       zone: 'A',
       orientation: 'north',
       roleDescription: 'Primary incoming ceremonial entrance for North crowd stream',
@@ -114,7 +114,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       archWidth: 5.5,
       archHeight: 4.8,
       kalasams: 5,
-      stoneColor: '#A38F78',
+      stoneColor: '#9CA3AF',
       zone: 'B',
       orientation: 'west',
       roleDescription: 'Secondary incoming entrance for West crowd stream',
@@ -139,7 +139,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       archWidth: 5.5,
       archHeight: 4.8,
       kalasams: 5,
-      stoneColor: '#A38F78',
+      stoneColor: '#9CA3AF',
       zone: 'C',
       orientation: 'east',
       roleDescription: 'Secondary incoming entrance for East crowd stream',
@@ -164,7 +164,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       archWidth: 7.5,
       archHeight: 5.4,
       kalasams: 5,
-      stoneColor: '#8C7355',
+      stoneColor: '#9CA3AF',
       zone: 'G',
       orientation: 'south',
       roleDescription: 'Primary public egress gateway for post-Darshan crowd dispersal',
@@ -189,7 +189,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       archWidth: 6.5,
       archHeight: 7.0,
       kalasams: 7,
-      stoneColor: '#9C7A5B',
+      stoneColor: '#9CA3AF',
       zone: 'D',
       roleDescription: 'Central architectural landmark terminating radial queue convergence into Garbhagriha',
     },
@@ -198,7 +198,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     role: 'main-gopuram',
   });
 
-  // Central Darshan Sanctum (Sri Ganesha Maha Garbhagriha)
+  // Central Darshan Sanctum (Arunachaleswarar Shiva Maha Garbhagriha)
   // Stepped Dravidian Vimana tower behind Central Gopuram
   components.push({
     id: `arch-darshan-sanctum-${genId}`,
@@ -212,7 +212,10 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       vimanaHeight: 16,
       sanctumPillars: 12,
       diyaGlow: true,
-      deity: 'Sri Ganesha',
+      deity: 'Arunachaleswarar Shiva Lingam',
+      showNandi: true,
+      showPrabhavali: true,
+      stoneColor: '#9CA3AF',
       zone: 'E',
       roleDescription: 'Sacred Sanctum Sanctorum for festive deity darshan',
     },
@@ -221,33 +224,156 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     role: 'darshan-sanctum',
   });
 
-  // Flanking Ceremonial Mandapam Pavilions
+  // Central Connecting Pillared Mandapam (Sacred Colonnaded Corridor)
   components.push({
-    id: `arch-mandapam-west-${genId}`,
-    type: COMPONENT_TYPES.TEMPLE_GATEWAY,
-    name: 'West Mandapam Pavilion',
-    position: { x: -28, y: 0, z: -10 },
+    id: `arch-mandapam-central-${genId}`,
+    type: COMPONENT_TYPES.MANDAPAM,
+    name: 'Central Maha Mandapam (Pillared Hall)',
+    position: { x: 0, y: 0, z: -21 },
     rotation: 0,
     scale: { x: 1, y: 1, z: 1 },
-    dimensions: { length: 10, width: 6, height: 8 },
-    properties: { pillars: 4, zone: 'D' },
+    dimensions: { length: 22, width: 12, height: 6 },
+    properties: {
+      pillarSpacing: 3.5,
+      stoneColor: '#9CA3AF',
+      zone: 'D',
+      roleDescription: 'Carved stone pillared hypostyle hall connecting Raja Gopuram to the Sanctum',
+    },
     generated: true,
     generationId: genId,
-    role: 'mandapam-west',
+    role: 'mandapam-central',
   });
 
+  // =========================================================================
+  // CONTINUOUS PERIMETER PRAKARAM WALL ENCLOSURE SYSTEM (MADHIL)
+  // Completely encloses the temple on North, South, East, and West
+  // Only designated Gopuram portals allow passage!
+  // =========================================================================
+  const wallH = 5.6;
+  const wallThick = 2.4;
+
+  // 1. North Perimeter Walls (Left & Right of North Gopuram)
+  const nwLen = Math.abs(-9 - westGopuramX);
   components.push({
-    id: `arch-mandapam-east-${genId}`,
-    type: COMPONENT_TYPES.TEMPLE_GATEWAY,
-    name: 'East Mandapam Pavilion',
-    position: { x: 28, y: 0, z: -10 },
+    id: `wall-north-west-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'North-West Outer Prakaram Wall',
+    position: { x: (westGopuramX - 9) / 2, y: 0, z: northGopuramZ },
     rotation: 0,
     scale: { x: 1, y: 1, z: 1 },
-    dimensions: { length: 10, width: 6, height: 8 },
-    properties: { pillars: 4, zone: 'D' },
+    dimensions: { length: nwLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'north' },
     generated: true,
     generationId: genId,
-    role: 'mandapam-east',
+    role: 'prakaram-wall',
+  });
+
+  const neLen = Math.abs(eastGopuramX - 9);
+  components.push({
+    id: `wall-north-east-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'North-East Outer Prakaram Wall',
+    position: { x: (9 + eastGopuramX) / 2, y: 0, z: northGopuramZ },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: neLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'north' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  // 2. South Perimeter Walls (Left & Right of South Gopuram)
+  const swLen = Math.abs(-10 - westGopuramX);
+  components.push({
+    id: `wall-south-west-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'South-West Outer Prakaram Wall',
+    position: { x: (westGopuramX - 10) / 2, y: 0, z: southGopuramZ },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: swLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'south' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  const seLen = Math.abs(eastGopuramX - 10);
+  components.push({
+    id: `wall-south-east-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'South-East Outer Prakaram Wall',
+    position: { x: (10 + eastGopuramX) / 2, y: 0, z: southGopuramZ },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: seLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'south' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  // 3. West Perimeter Walls (North & South of West Gopuram at Z = -10, half-width = 8)
+  const wnLen = Math.abs(-18 - northGopuramZ);
+  components.push({
+    id: `wall-west-north-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'West-North Outer Prakaram Wall',
+    position: { x: westGopuramX, y: 0, z: (northGopuramZ - 18) / 2 },
+    rotation: 90,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: wnLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'west' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  const wsLen = Math.abs(southGopuramZ - (-2));
+  components.push({
+    id: `wall-west-south-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'West-South Outer Prakaram Wall',
+    position: { x: westGopuramX, y: 0, z: (-2 + southGopuramZ) / 2 },
+    rotation: 90,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: wsLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'west' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  // 4. East Perimeter Walls (North & South of East Gopuram at Z = -10, half-width = 8)
+  const enLen = Math.abs(-18 - northGopuramZ);
+  components.push({
+    id: `wall-east-north-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'East-North Outer Prakaram Wall',
+    position: { x: eastGopuramX, y: 0, z: (northGopuramZ - 18) / 2 },
+    rotation: 90,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: enLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'east' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
+  });
+
+  const esLen = Math.abs(southGopuramZ - (-2));
+  components.push({
+    id: `wall-east-south-${genId}`,
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'East-South Outer Prakaram Wall',
+    position: { x: eastGopuramX, y: 0, z: (-2 + southGopuramZ) / 2 },
+    rotation: 90,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: esLen, width: wallThick, height: wallH },
+    properties: { stoneColor: '#BAAA94', orientation: 'east' },
+    generated: true,
+    generationId: genId,
+    role: 'prakaram-wall',
   });
 
   // =========================================================================
@@ -274,8 +400,8 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     });
   });
 
-  // North Arrival Plaza Demarcation Guide Rails
-  [-30, -20, -10, 0, 10, 20, 30].forEach((rX, rIdx) => {
+  // North Arrival Plaza Demarcation Guide Rails (Flanking channels, leaving central axis open)
+  [-25, -15, 15, 25].forEach((rX, rIdx) => {
     components.push({
       id: `bar-arrival-n-${rIdx}-${genId}`,
       type: COMPONENT_TYPES.BARRIER,
@@ -314,30 +440,32 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     role: 'holding-bay',
   });
 
-  // Holding Loop Boundary & Release Gate Rails
-  components.push({
-    id: `bar-hloop-n-top-${genId}`,
-    type: COMPONENT_TYPES.BARRIER,
-    name: 'North Holding North Perimeter Rail',
-    position: { x: 0, y: 0, z: northHoldingZ - 6.2 },
-    rotation: 0,
-    scale: { x: 1, y: 1, z: 1 },
-    dimensions: { length: 36, width: 0.25, height: 1.0 },
-    properties: { style: 'double-rail', zone: 'A' },
-    generated: true,
-    generationId: genId,
-  });
-  components.push({
-    id: `bar-hloop-n-bot-${genId}`,
-    type: COMPONENT_TYPES.BARRIER,
-    name: 'North Holding Release Boundary Rail',
-    position: { x: 0, y: 0, z: northHoldingZ + 6.2 },
-    rotation: 0,
-    scale: { x: 1, y: 1, z: 1 },
-    dimensions: { length: 36, width: 0.25, height: 1.0 },
-    properties: { style: 'double-rail', zone: 'A' },
-    generated: true,
-    generationId: genId,
+  // Holding Loop Boundary & Release Gate Rails (Flanking wings, leaving wide central entry portal open)
+  [-14, 14].forEach((sideX, sIdx) => {
+    components.push({
+      id: `bar-hloop-n-top-${sIdx}-${genId}`,
+      type: COMPONENT_TYPES.BARRIER,
+      name: `North Holding North Flank Rail ${sIdx + 1}`,
+      position: { x: sideX, y: 0, z: northHoldingZ - 6.2 },
+      rotation: 0,
+      scale: { x: 1, y: 1, z: 1 },
+      dimensions: { length: 12, width: 0.25, height: 1.0 },
+      properties: { style: 'double-rail', zone: 'A' },
+      generated: true,
+      generationId: genId,
+    });
+    components.push({
+      id: `bar-hloop-n-bot-${sIdx}-${genId}`,
+      type: COMPONENT_TYPES.BARRIER,
+      name: `North Holding Release Flank Rail ${sIdx + 1}`,
+      position: { x: sideX, y: 0, z: northHoldingZ + 6.2 },
+      rotation: 0,
+      scale: { x: 1, y: 1, z: 1 },
+      dimensions: { length: 12, width: 0.25, height: 1.0 },
+      properties: { style: 'double-rail', zone: 'A' },
+      generated: true,
+      generationId: genId,
+    });
   });
 
   // A3. North Security Screening (Pattern: PARALLEL - 6 Channels)
@@ -366,68 +494,196 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     });
   });
 
-  // A4. North Serpentine Queue System (Pattern: SERPENTINE)
-  // 6 continuous physically connected serpentine lanes (2m wide, 56m long)
-  const northSerpentineZ = [-46, -41, -36, -31, -26, -21];
-  northSerpentineZ.forEach((sZ, lIdx) => {
-    components.push({
-      id: `gen-queue-north-l${lIdx + 1}-${genId}`,
-      type: COMPONENT_TYPES.QUEUE,
-      name: `North Serpentine Queue - Lane ${lIdx + 1}`,
-      position: { x: 0, y: 0, z: sZ },
-      rotation: 0,
-      scale: { x: 1, y: 1, z: 1 },
-      dimensions: { length: 56, width: 2.0, height: 1.0 },
+  // A4. North Multi-Pattern Queue System: 2 Direct Special Darshan Lines + 4 Extended Free Darshan Serpentine Lines
+  // Devotees enter from North vertically and move Southward towards the temple:
+  // - 2 Direct Special Darshan lines (Lanes 3 & 4) connect straight to the central sanctum
+  // - 4 Free Darshan lines (Lanes 1, 2, 5, 6) utilize the spacious courtyard space with
+  //   high-capacity multi-pass serpentine and switchback queues with smooth curved bends.
+  const northQueueConfigs = [
+    {
+      lIdx: 0,
+      name: 'North Free Darshan Lane 1 (West Wing Serpentine)',
+      position: { x: -20.0, y: 0, z: -35 },
+      rotation: 90,
+      dimensions: { length: 26, width: 2.2, height: 1.0 },
       properties: {
         lanes: 1,
-        direction: lIdx % 2 === 0 ? 'east' : 'west',
+        direction: 'south',
         zone: 'A',
+        stream: 'north',
         pattern: 'serpentine',
-        roleDescription: 'High-capacity continuous serpentine lane connected by return bends',
+        shape: 'serpentine',
+        pathData: {
+          type: 'serpentine',
+          params: { rows: 3, rowLength: 26, spacing: 2.2 },
+        },
+        orientation: 'vertical',
+        category: 'free',
+        roleDescription: 'High-capacity outer West wing serpentine queue for Free Darshan',
       },
+    },
+    {
+      lIdx: 1,
+      name: 'North Free Darshan Lane 2 (West Courtyard Serpentine)',
+      position: { x: -12.0, y: 0, z: -35 },
+      rotation: 90,
+      dimensions: { length: 26, width: 2.2, height: 1.0 },
+      properties: {
+        lanes: 1,
+        direction: 'south',
+        zone: 'A',
+        stream: 'north',
+        pattern: 'serpentine',
+        shape: 'serpentine',
+        pathData: {
+          type: 'serpentine',
+          params: { rows: 2, rowLength: 26, spacing: 2.2 },
+        },
+        orientation: 'vertical',
+        category: 'free',
+        roleDescription: 'Courtyard serpentine queue for Free Darshan',
+      },
+    },
+    {
+      lIdx: 2,
+      name: 'North Special Darshan Lane 1 (Center West)',
+      position: { x: -4.0, y: 0, z: -34 },
+      rotation: 90,
+      dimensions: { length: 30, width: 2.0, height: 1.0 },
+      properties: {
+        lanes: 1,
+        direction: 'south',
+        zone: 'A',
+        stream: 'north',
+        pattern: 'parallel',
+        shape: 'straight',
+        orientation: 'vertical',
+        isDirect: true,
+        category: 'direct',
+        roleDescription: 'Direct Special Darshan lane flowing straight to central sanctum',
+      },
+    },
+    {
+      lIdx: 3,
+      name: 'North Special Darshan Lane 2 (Center East)',
+      position: { x: 4.0, y: 0, z: -34 },
+      rotation: 90,
+      dimensions: { length: 30, width: 2.0, height: 1.0 },
+      properties: {
+        lanes: 1,
+        direction: 'south',
+        zone: 'A',
+        stream: 'north',
+        pattern: 'parallel',
+        shape: 'straight',
+        orientation: 'vertical',
+        isDirect: true,
+        category: 'direct',
+        roleDescription: 'Direct Special Darshan lane flowing straight to central sanctum',
+      },
+    },
+    {
+      lIdx: 4,
+      name: 'North Free Darshan Lane 3 (East Courtyard Serpentine)',
+      position: { x: 12.0, y: 0, z: -35 },
+      rotation: 90,
+      dimensions: { length: 26, width: 2.2, height: 1.0 },
+      properties: {
+        lanes: 1,
+        direction: 'south',
+        zone: 'A',
+        stream: 'north',
+        pattern: 'serpentine',
+        shape: 'serpentine',
+        pathData: {
+          type: 'serpentine',
+          params: { rows: 2, rowLength: 26, spacing: 2.2 },
+        },
+        orientation: 'vertical',
+        category: 'free',
+        roleDescription: 'Courtyard serpentine queue for Free Darshan',
+      },
+    },
+    {
+      lIdx: 5,
+      name: 'North Free Darshan Lane 4 (East Wing Serpentine)',
+      position: { x: 20.0, y: 0, z: -35 },
+      rotation: 90,
+      dimensions: { length: 26, width: 2.2, height: 1.0 },
+      properties: {
+        lanes: 1,
+        direction: 'south',
+        zone: 'A',
+        stream: 'north',
+        pattern: 'serpentine',
+        shape: 'serpentine',
+        pathData: {
+          type: 'serpentine',
+          params: { rows: 3, rowLength: 26, spacing: 2.2 },
+        },
+        orientation: 'vertical',
+        category: 'free',
+        roleDescription: 'High-capacity outer East wing serpentine queue for Free Darshan',
+      },
+    },
+  ];
+
+  northQueueConfigs.forEach((cfg) => {
+    components.push({
+      id: `gen-queue-north-l${cfg.lIdx + 1}-${genId}`,
+      type: COMPONENT_TYPES.QUEUE,
+      name: cfg.name,
+      position: cfg.position,
+      rotation: cfg.rotation,
+      scale: { x: 1, y: 1, z: 1 },
+      dimensions: cfg.dimensions,
+      properties: cfg.properties,
       generated: true,
       generationId: genId,
       role: 'queue-lane',
     });
-
-    // Partition Rails between Serpentine Lanes
-    [-1.25, 1.25].forEach((offsetZ, bIdx) => {
-      components.push({
-        id: `bar-queue-n-${lIdx}-${bIdx}-${genId}`,
-        type: COMPONENT_TYPES.BARRIER,
-        name: `North Serpentine Guide Rail ${lIdx + 1}-${bIdx + 1}`,
-        position: { x: 0, y: 0, z: sZ + offsetZ },
-        rotation: 0,
-        scale: { x: 1, y: 1, z: 1 },
-        dimensions: { length: 54, width: 0.2, height: 1.0 },
-        properties: { style: 'double-rail', zone: 'A' },
-        generated: true,
-        generationId: genId,
-        role: 'queue-barrier',
-      });
-    });
   });
 
-  // Serpentine U-Turn Return Demarcation Barriers at East and West Ends
-  northSerpentineZ.forEach((sZ, lIdx) => {
-    if (lIdx < northSerpentineZ.length - 1) {
-      const isEastTurn = lIdx % 2 === 0;
-      const turnX = isEastTurn ? 28.5 : -28.5;
-      const nextZ = northSerpentineZ[lIdx + 1];
-      components.push({
-        id: `bar-turn-n-${lIdx}-${genId}`,
-        type: COMPONENT_TYPES.BARRIER,
-        name: `Serpentine Return Bend Rail ${lIdx + 1}`,
-        position: { x: turnX, y: 0, z: (sZ + nextZ) / 2 },
-        rotation: 90,
-        scale: { x: 1, y: 1, z: 1 },
-        dimensions: { length: Math.abs(nextZ - sZ), width: 0.25, height: 1.0 },
-        properties: { style: 'double-rail', zone: 'A' },
-        generated: true,
-        generationId: genId,
-        role: 'queue-barrier',
-      });
-    }
+  // A5. Central Unified Darshan Spine Queue (The Single Queue leading directly to Darshan)
+  // Continuous physical queue connecting seamlessly from the funnel to the Darshan Sanctum point
+  components.push({
+    id: `gen-queue-north-darshan-spine-${genId}`,
+    type: COMPONENT_TYPES.QUEUE,
+    name: 'North Central Unified Darshan Queue',
+    position: { x: 0, y: 0, z: -10 },
+    rotation: 90,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: 17, width: 2.8, height: 1.0 },
+    properties: {
+      lanes: 1,
+      direction: 'south',
+      zone: 'A',
+      pattern: 'parallel',
+      covered: true,
+      hasCanopy: true,
+      isMergeSpine: true,
+      roleDescription: 'Single ceremonial covered unified darshan queue leading directly to deity viewing',
+    },
+    generated: true,
+    generationId: genId,
+    role: 'unified-darshan-queue',
+  });
+
+  // Unified Spine Guide Rails flanking the central queue line
+  [-1.45, 1.45].forEach((offsetX, bIdx) => {
+    components.push({
+      id: `bar-spine-n-${bIdx}-${genId}`,
+      type: COMPONENT_TYPES.BARRIER,
+      name: `North Unified Darshan Spine Rail ${bIdx + 1}`,
+      position: { x: offsetX, y: 0, z: -10 },
+      rotation: 90,
+      scale: { x: 1, y: 1, z: 1 },
+      dimensions: { length: 17, width: 0.2, height: 1.0 },
+      properties: { style: 'double-rail', zone: 'A' },
+      generated: true,
+      generationId: genId,
+      role: 'queue-barrier',
+    });
   });
 
   // =========================================================================
@@ -500,7 +756,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     });
   });
 
-  // B4. West Switchback Queue (Pattern: SWITCHBACK)
+  // B4. West Switchback Queues (Pattern: SWITCHBACK)
   const westSwitchbackCenterX = Math.round((westSecurityX + 27) * 10) / 10;
   const westSwitchbackZ = [-20, -15, -10, -5, 0];
   westSwitchbackZ.forEach((sZ, lIdx) => {
@@ -516,7 +772,9 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
         lanes: 1,
         direction: lIdx % 2 === 0 ? 'east' : 'west',
         zone: 'B',
+        stream: 'west',
         pattern: 'switchback',
+        shape: 'switchback',
         roleDescription: 'Wide shallow switchback channel feeding into Central Distribution Hub',
       },
       generated: true,
@@ -539,6 +797,57 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
         role: 'queue-barrier',
       });
     });
+  });
+
+  // B5. West 5-to-1 V-Shape Queue Convergence Pavilion & Unified Darshan Spine
+  // Grand authentic covered V-shaped arcade spanning all 5 West parallel lanes and converging into the single Darshan spine
+  components.push({
+    id: `gen-queue-west-vfunnel-${genId}`,
+    type: COMPONENT_TYPES.QUEUE,
+    name: 'West 5-to-1 V-Shape Queue Convergence Pavilion (Covered)',
+    position: { x: -28, y: 0, z: -10 },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: 14, width: 23.5, height: 1.0 },
+    properties: {
+      pattern: 'v_shape',
+      direction: 'east',
+      widthStart: 23.5,
+      widthEnd: 3.2,
+      covered: true,
+      hasCanopy: true,
+      isMergeSpine: true,
+      zone: 'B',
+      stream: 'west',
+      roleDescription: 'Grand V-shaped covered queue arcade spanning all 5 West lanes and converging into the unified Darshan queue spine',
+    },
+    generated: true,
+    generationId: genId,
+    role: 'v-shape-queue-west',
+  });
+
+  components.push({
+    id: `gen-queue-west-unified-${genId}`,
+    type: COMPONENT_TYPES.QUEUE,
+    name: 'West Unified Darshan Merge Queue (Covered Single Line)',
+    position: { x: -12.5, y: 0, z: -10 },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: 17, width: 3.2, height: 1.0 },
+    properties: {
+      lanes: 1,
+      direction: 'east',
+      zone: 'B',
+      stream: 'west',
+      pattern: 'parallel',
+      covered: true,
+      hasCanopy: true,
+      isMergeSpine: true,
+      roleDescription: 'Single covered unified queue line leading straight from V-funnel into Darshan',
+    },
+    generated: true,
+    generationId: genId,
+    role: 'unified-darshan-queue-west',
   });
 
   // =========================================================================
@@ -611,7 +920,7 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
     });
   });
 
-  // C4. East Multi-Lane Parallel Queue (Pattern: PARALLEL)
+  // C4. East Multi-Lane Parallel Queues (Pattern: PARALLEL)
   // High-throughput processing with independent parallel lanes running towards the Central Hub
   const eastParallelCenterX = Math.round((eastSecurityX - 27) * 10) / 10;
   const eastParallelZ = [-20, -15, -10, -5, 0];
@@ -628,7 +937,9 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
         lanes: 1,
         direction: 'west', // Direct linear parallel throughput towards Central Hub
         zone: 'C',
+        stream: 'east',
         pattern: 'parallel',
+        shape: 'straight',
         roleDescription: 'High-throughput independent parallel lane feeding into Central Distribution Hub',
       },
       generated: true,
@@ -651,6 +962,57 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
         role: 'queue-barrier',
       });
     });
+  });
+
+  // C5. East 5-to-1 V-Shape Queue Convergence Pavilion & Unified Darshan Spine
+  // Grand authentic covered V-shaped arcade spanning all 5 East parallel lanes and converging into the single Darshan spine
+  components.push({
+    id: `gen-queue-east-vfunnel-${genId}`,
+    type: COMPONENT_TYPES.QUEUE,
+    name: 'East 5-to-1 V-Shape Queue Convergence Pavilion (Covered)',
+    position: { x: 28, y: 0, z: -10 },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: 14, width: 23.5, height: 1.0 },
+    properties: {
+      pattern: 'v_shape',
+      direction: 'west',
+      widthStart: 23.5,
+      widthEnd: 3.2,
+      covered: true,
+      hasCanopy: true,
+      isMergeSpine: true,
+      zone: 'C',
+      stream: 'east',
+      roleDescription: 'Grand V-shaped covered queue arcade spanning all 5 East lanes and converging into the unified Darshan queue spine',
+    },
+    generated: true,
+    generationId: genId,
+    role: 'v-shape-queue-east',
+  });
+
+  components.push({
+    id: `gen-queue-east-unified-${genId}`,
+    type: COMPONENT_TYPES.QUEUE,
+    name: 'East Unified Darshan Merge Queue (Covered Single Line)',
+    position: { x: 12.5, y: 0, z: -10 },
+    rotation: 0,
+    scale: { x: 1, y: 1, z: 1 },
+    dimensions: { length: 17, width: 3.2, height: 1.0 },
+    properties: {
+      lanes: 1,
+      direction: 'west',
+      zone: 'C',
+      stream: 'east',
+      pattern: 'parallel',
+      covered: true,
+      hasCanopy: true,
+      isMergeSpine: true,
+      roleDescription: 'Single covered unified queue line leading straight from V-funnel into Darshan',
+    },
+    generated: true,
+    generationId: genId,
+    role: 'unified-darshan-queue-east',
   });
 
   // =========================================================================
@@ -677,6 +1039,11 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       properties: {
         lanes: 1,
         pattern: 'radial',
+        shape: 'radial',
+        pathData: {
+          type: 'radial',
+          params: { length: 10 },
+        },
         zone: 'D',
         roleDescription: 'Radial approach corridor converging towards Central Temple Darshan portal',
       },
@@ -829,23 +1196,6 @@ export function generateFestivalScenario(siteInput = null, optionsInput = {}) {
       scale: { x: 1, y: 1, z: 1 },
       dimensions: { length: 4.5, width: 2.5, height: 2.8 },
       properties: { signage: `EXIT ${idx + 1}`, oneWay: true, zone: 'G' },
-      generated: true,
-      generationId: genId,
-      role: 'egress-corridor',
-    });
-  });
-
-  // Flanking Egress / Emergency Release Portals next to South Gopuram
-  [-16, 16].forEach((fX, idx) => {
-    components.push({
-      id: `gen-exit-flank-${idx + 1}-${genId}`,
-      type: COMPONENT_TYPES.EXIT,
-      name: `Emergency Egress Portal ${idx === 0 ? 'West' : 'East'}`,
-      position: { x: fX, y: 0, z: southGopuramZ },
-      rotation: 0,
-      scale: { x: 1, y: 1, z: 1 },
-      dimensions: { length: 5.0, width: 2.0, height: 2.8 },
-      properties: { signage: 'EMERGENCY EGRESS', oneWay: true, zone: 'G' },
       generated: true,
       generationId: genId,
       role: 'egress-corridor',

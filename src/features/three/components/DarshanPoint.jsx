@@ -17,8 +17,8 @@ export function DarshanPoint({ component, isSelected }) {
   const { camera } = useThree();
   const showLabels = useQueueStore((state) => state.showLabels);
 
-  const isCameraClose = camera ? camera.position.length() < 135 : true;
-  const isLabelVisible = showLabels && (isSelected || isCameraClose);
+  const isCameraClose = camera ? camera.position.length() < 65 : false;
+  const isLabelVisible = showLabels && (isSelected || (isCameraClose && !properties.sanctumFocal));
 
   const stoneDark = '#4A3B2C';
   const stoneWarm = '#9E8265';

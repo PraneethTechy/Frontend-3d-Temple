@@ -7,14 +7,16 @@ import {
   Armchair, 
   Sparkles, 
   LogOut, 
-  Plus,
-  Layers,
-  Landmark,
-  Crown,
-  DoorOpen,
-  Columns3,
-  Search,
-  X
+  Plus, 
+  Layers, 
+  Landmark, 
+  Crown, 
+  DoorOpen, 
+  Columns3, 
+  Building2,
+  Shield,
+  Search, 
+  X 
 } from 'lucide-react';
 import { useQueueStore } from '../../store/useQueueStore.js';
 import { COMPONENT_TYPES } from '../../utils/componentDefaults.js';
@@ -31,13 +33,25 @@ const TEMPLE_COMPONENTS = [
     type: COMPONENT_TYPES.MAIN_GOPURAM,
     name: 'Main Gopuram',
     icon: Crown,
-    description: 'Central 22m Raja Gopuram',
+    description: 'Central Raja Gopuram',
   },
   {
     type: COMPONENT_TYPES.DARSHAN_SANCTUM,
     name: 'Darshan Sanctum',
     icon: Sparkles,
     description: 'Sacred inner sanctum',
+  },
+  {
+    type: COMPONENT_TYPES.MANDAPAM,
+    name: 'Mandapam',
+    icon: Building2,
+    description: 'Carved pillared hall',
+  },
+  {
+    type: COMPONENT_TYPES.PRAKARAM_WALL,
+    name: 'Prakaram Wall',
+    icon: Shield,
+    description: 'Granite enclosure wall',
   },
   {
     type: COMPONENT_TYPES.ENTRANCE_GOPURAM, // Reusable with role or dedicated South Exit
@@ -126,7 +140,7 @@ export function ComponentsPanel() {
   };
 
   return (
-    <aside className="w-68 h-full bg-white/95 backdrop-blur-md border-r border-stone-200/80 flex flex-col flex-shrink-0 select-none shadow-soft z-20">
+    <aside className="w-full h-full bg-white/95 backdrop-blur-md border-r border-stone-200/80 flex flex-col flex-shrink-0 select-none shadow-soft z-20">
       {/* Fixed Search Header */}
       <div className="p-3.5 border-b border-stone-200/80 space-y-2.5 bg-white/80 flex-shrink-0">
         <div className="flex items-center justify-between">

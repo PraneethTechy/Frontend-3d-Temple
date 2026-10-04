@@ -2,6 +2,7 @@ import React from 'react';
 import { Html } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useQueueStore } from '../../../store/useQueueStore.js';
+import { SecurityGuard } from './SecurityGuard.jsx';
 
 export function SecurityCheckpoint({ component, isSelected }) {
   const { dimensions } = component;
@@ -48,6 +49,14 @@ export function SecurityCheckpoint({ component, isSelected }) {
         </mesh>
       </group>
 
+      {/* Guard 1: DFMD Screening Officer stationed attentively beside detector */}
+      <SecurityGuard
+        position={[-length * 0.25 - 0.72, 0, 0.15]}
+        rotation={[0, 0.25, 0]}
+        scale={0.92}
+        role="dfmd_guard"
+      />
+
       {/* Baggage Inspection Counter / Conveyor (Right Side) */}
       <group position={[length * 0.28, 0, 0]}>
         {/* Counter Table Body */}
@@ -66,6 +75,14 @@ export function SecurityCheckpoint({ component, isSelected }) {
           <meshStandardMaterial color="#2D3748" roughness={0.4} metalness={0.5} />
         </mesh>
       </group>
+
+      {/* Guard 2: Baggage Screening Officer stationed behind inspection table */}
+      <SecurityGuard
+        position={[length * 0.28, 0, -width * 0.32]}
+        rotation={[0, 0, 0]}
+        scale={0.92}
+        role="baggage_guard"
+      />
 
       {/* Label Badge with LOD visibility */}
       {isLabelVisible && (

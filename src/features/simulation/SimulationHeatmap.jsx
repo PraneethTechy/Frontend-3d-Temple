@@ -32,8 +32,15 @@ export function SimulationHeatmap() {
       depthWrite: false,
     });
 
-    return { geometry: geo, material: mat, maxCells: 12000 };
+    return { geometry: geo, material: mat, maxCells: 4000 };
   }, []);
+
+  React.useEffect(() => {
+    return () => {
+      geometry?.dispose?.();
+      material?.dispose?.();
+    };
+  }, [geometry, material]);
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;

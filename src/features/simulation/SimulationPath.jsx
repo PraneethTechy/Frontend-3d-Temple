@@ -27,42 +27,34 @@ export function SimulationPath() {
       {lineGeometries.map(({ id, geometry }) => (
         <line key={id} geometry={geometry}>
           <lineDashedMaterial
-            color="#D97706"
-            dashSize={0.8}
-            gapSize={0.4}
-            linewidth={2}
+            color="#B45309"
+            dashSize={0.6}
+            gapSize={0.6}
+            linewidth={1}
             transparent
-            opacity={0.7}
+            opacity={0.15}
           />
         </line>
       ))}
 
-      {/* Waypoint nodes indicator circles */}
+      {/* Subtle Milestone indicators at Outer Entrance & Exit Gates only - never cluttering inside queue lines */}
       {paths.map((p) =>
-        (p.waypoints || []).map((wp, idx) => (
-          <mesh
-            key={`${p.id}-${idx}`}
-            position={[wp.x, 0.05, wp.z]}
-            rotation={[-Math.PI / 2, 0, 0]}
-          >
-            <circleGeometry args={[0.3, 16]} />
-            <meshBasicMaterial
-              color={
-                wp.zone === 'entrance'
-                  ? '#059669'
-                  : wp.zone === 'security'
-                  ? '#D97706'
-                  : wp.zone === 'darshan'
-                  ? '#EAB308'
-                  : wp.zone === 'exit'
-                  ? '#2563EB'
-                  : '#A8A29E'
-              }
-              transparent
-              opacity={0.65}
-            />
-          </mesh>
-        ))
+        (p.waypoints || [])
+          .filter((wp) => wp.zone === 'entrance' || wp.zone === 'exit')
+          .map((wp, idx) => (
+            <mesh
+              key={`${p.id}-${idx}`}
+              position={[wp.x, 0.05, wp.z]}
+              rotation={[-Math.PI / 2, 0, 0]}
+            >
+              <circleGeometry args={[0.16, 16]} />
+              <meshBasicMaterial
+                color={wp.zone === 'entrance' ? '#059669' : '#2563EB'}
+                transparent
+                opacity={0.25}
+              />
+            </mesh>
+          ))
       )}
     </group>
   );

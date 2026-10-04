@@ -12,10 +12,13 @@ import { SecurityCheckpoint } from './SecurityCheckpoint.jsx';
 import { WaitingArea } from './WaitingArea.jsx';
 import { DarshanPoint } from './DarshanPoint.jsx';
 import { ExitCorridor } from './ExitCorridor.jsx';
+import { DravidianGopuram } from './DravidianGopuram.jsx';
 import { EntranceGopuram } from './EntranceGopuram.jsx';
 import { MainGopuram } from './MainGopuram.jsx';
 import { DarshanSanctum } from './DarshanSanctum.jsx';
 import { TempleGateway } from './TempleGateway.jsx';
+import { Mandapam } from './Mandapam.jsx';
+import { PrakaramWall } from './PrakaramWall.jsx';
 
 const COMPONENT_RENDERERS = {
   // Crowd Management Infrastructure
@@ -37,6 +40,7 @@ const COMPONENT_RENDERERS = {
   exit: ExitCorridor,
   exit_corridor: ExitCorridor,
   // Temple Architecture Components
+  dravidian_gopuram: DravidianGopuram,
   entrance_gopuram: EntranceGopuram,
   gopuram: EntranceGopuram,
   main_gopuram: MainGopuram,
@@ -45,13 +49,16 @@ const COMPONENT_RENDERERS = {
   sanctum: DarshanSanctum,
   temple_gateway: TempleGateway,
   gateway: TempleGateway,
+  mandapam: Mandapam,
+  prakaram_wall: PrakaramWall,
+  wall: PrakaramWall,
 };
 
 export const ComponentWrapper = React.memo(function ComponentWrapper({ component }) {
   const groupRef = useRef();
   const [hovered, setHovered] = useState(false);
 
-  const selectedComponentId = useQueueStore((state) => state.selectedComponentId);
+  const isSelected = useQueueStore((state) => state.selectedComponentId === component.id);
   const setSelectedComponentId = useQueueStore((state) => state.setSelectedComponentId);
   const updateComponent = useQueueStore((state) => state.updateComponent);
   const transformMode = useQueueStore((state) => state.transformMode);
@@ -63,8 +70,6 @@ export const ComponentWrapper = React.memo(function ComponentWrapper({ component
   const simulationStatus = useSimulationStore((state) => state.status);
 
   if (!component) return null;
-
-  const isSelected = selectedComponentId === component.id;
 
   // Validation issue detection
   const hasError = useMemo(() => {
@@ -174,6 +179,7 @@ export const ComponentWrapper = React.memo(function ComponentWrapper({ component
         onClick={handleClick}
         onPointerOver={(e) => {
           e.stopPropagation();
+          if (e.buttons > 0 || e.nativeEvent?.buttons > 0) return;
           setHovered(true);
         }}
         onPointerOut={(e) => {

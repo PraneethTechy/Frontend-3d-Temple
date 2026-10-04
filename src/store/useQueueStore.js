@@ -5,6 +5,7 @@ import { createComponentInstance, COMPONENT_TYPES } from '../utils/componentDefa
 import { generateProceduralLayout, QUEUE_TEMPLATES, DEFAULT_GENERATION_OPTIONS } from '../services/layout/layoutGenerator.js';
 import { generateFestivalScenario } from '../services/layout/festivalScenarioGenerator.js';
 import { validateLayout } from '../services/layout/layoutValidator.js';
+import { generateDeterministicExpansionComponents } from '../services/layout/capacityExpansionPlanner.js';
 import { 
   fetchSavedPlans, 
   fetchPlanById, 
@@ -102,6 +103,7 @@ export const useQueueStore = create((set, get) => ({
   // Phase 8: Immersive 3D Review & Studio Layout States
   isImmersive: false,
   leftPanelCollapsed: false,
+  leftPanelWidth: 320,
   rightPanelCollapsed: false,
   showFlow: false,
   showLabels: true,
@@ -121,6 +123,7 @@ export const useQueueStore = create((set, get) => ({
   setIsImmersive: (isImmersive) => set({ isImmersive: !!isImmersive }),
   toggleLeftPanel: () => set((state) => ({ leftPanelCollapsed: !state.leftPanelCollapsed })),
   setLeftPanelCollapsed: (collapsed) => set({ leftPanelCollapsed: !!collapsed }),
+  setLeftPanelWidth: (width) => set({ leftPanelWidth: Math.max(260, Math.min(650, Number(width) || 320)) }),
   toggleRightPanel: () => set((state) => ({ rightPanelCollapsed: !state.rightPanelCollapsed })),
   setRightPanelCollapsed: (collapsed) => set({ rightPanelCollapsed: !!collapsed }),
   toggleShowFlow: () => set((state) => ({ showFlow: !state.showFlow })),
@@ -323,6 +326,97 @@ export const useQueueStore = create((set, get) => ({
     });
   },
 
+  // Capacity Expansion 3D Preview & Apply Actions
+  startCapacityExpansionPreview: (planResult) => {
+    if (!planResult) return;
+    const currentScene = get().scene;
+    let expansionComponents = planResult.proposedComponents;
+
+    if (!expansionComponents || expansionComponents.length === 0) {
+      if (planResult.plan) {
+        const genRes = generateDeterministicExpansionComponents(planResult.plan, currentScene);
+        if (genRes.success) {
+          expansionComponents = genRes.components;
+        }
+      }
+    }
+
+    if (!expansionComponents || expansionComponents.length === 0) return;
+
+    const targetZone = planResult.plan?.targetZone || 'north';
+    const previewLayout = {
+      type: 'capacity_expansion',
+      id: `cap-exp-preview-${Date.now()}`,
+      title: `Capacity Expansion: +${expansionComponents.length} Lanes (${targetZone.toUpperCase()})`,
+      plan: planResult.plan,
+      expansionComponents,
+      additionalCapacity: planResult.expectedCapacityIncrease || 0,
+      expectedCapacityIncrease: planResult.expectedCapacityIncrease || 0,
+      targetZone,
+      // Render existing temple architecture + proposed expansion components together in preview
+      components: [...currentScene.components, ...expansionComponents],
+      analysis: validateLayout({ ...currentScene, components: [...currentScene.components, ...expansionComponents] }),
+    };
+
+    set({
+      previewLayout,
+      isPreviewing: true,
+      selectedComponentId: null,
+    });
+  },
+
+  discardCapacityExpansion: () => {
+    set({
+      previewLayout: null,
+      isPreviewing: false,
+    });
+  },
+
+  applyCapacityExpansion: (expansionInput) => {
+    const preview = get().previewLayout;
+    let expansionComponents = expansionInput?.expansionComponents || expansionInput?.proposedComponents;
+
+    if (!expansionComponents && preview?.type === 'capacity_expansion') {
+      expansionComponents = preview.expansionComponents;
+    }
+
+    if (!expansionComponents && expansionInput?.plan) {
+      const genRes = generateDeterministicExpansionComponents(expansionInput.plan, get().scene);
+      if (genRes.success) {
+        expansionComponents = genRes.components;
+      }
+    }
+
+    if (!Array.isArray(expansionComponents) || expansionComponents.length === 0) return;
+
+    // 1. Record snapshot for ONE single undoable operation
+    get().recordSnapshot();
+
+    const currentScene = get().scene;
+    // 2. Strictly additive: preserve existing temple architecture, Gopurams, Sanctum, queues
+    const updatedComponents = [...currentScene.components, ...expansionComponents];
+
+    const updatedScene = {
+      ...currentScene,
+      components: updatedComponents,
+    };
+    updatedScene.analysis = validateLayout(updatedScene);
+
+    set({
+      scene: updatedScene,
+      previewLayout: null,
+      isPreviewing: false,
+      selectedComponentId: null,
+      activeSidebarTab: 'analysis',
+      isDirty: true,
+    });
+
+    // 3. Seamlessly apply to running simulation: regenerate paths, recalculate pressure
+    try {
+      useSimulationStore.getState().applySceneExpansion(updatedScene);
+    } catch (e) {}
+  },
+
   // Phase 6: Persistence Actions
   fetchSavedPlans: async () => {
     set({ isLoadingPlans: true });
@@ -482,6 +576,10 @@ export const useQueueStore = create((set, get) => ({
         : null,
       isDirty: true,
     });
+
+    try {
+      useSimulationStore.getState().applySceneExpansion(updatedScene);
+    } catch (e) {}
   },
 
   // Redo Action
@@ -510,6 +608,10 @@ export const useQueueStore = create((set, get) => ({
         : null,
       isDirty: true,
     });
+
+    try {
+      useSimulationStore.getState().applySceneExpansion(updatedScene);
+    } catch (e) {}
   },
 
   // Component Management Actions

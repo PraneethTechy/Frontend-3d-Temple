@@ -11,6 +11,7 @@ export function useKeyboardShortcuts() {
   const setTransformMode = useQueueStore((state) => state.setTransformMode);
   const isImmersive = useQueueStore((state) => state.isImmersive);
   const toggleImmersive = useQueueStore((state) => state.toggleImmersive);
+  const focusCamera = useQueueStore((state) => state.focusCamera);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -31,6 +32,7 @@ export function useKeyboardShortcuts() {
       if ((e.key.toLowerCase() === 'f' && !isCtrlOrCmd) || (isCtrlOrCmd && e.shiftKey && e.key.toLowerCase() === 'f')) {
         e.preventDefault();
         toggleImmersive();
+        setTimeout(() => focusCamera('overview'), 40);
         return;
       }
 
@@ -64,6 +66,7 @@ export function useKeyboardShortcuts() {
           setSelectedComponentId(null);
         } else if (isImmersive) {
           toggleImmersive();
+          setTimeout(() => focusCamera('overview'), 40);
         }
         return;
       }

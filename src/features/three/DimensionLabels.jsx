@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { Html } from '@react-three/drei';
 import { toMeters, UNIT_LABELS, formatNumber } from '../../utils/units.js';
 import { useQueueStore } from '../../store/useQueueStore.js';
+import { useCapacityExpansionStore } from '../simulation/capacityExpansionStore.js';
 
 const dimLineMaterial = new THREE.LineBasicMaterial({ color: '#A06E28', linewidth: 2 });
 
@@ -56,9 +57,12 @@ export function DimensionLabels({ length, width, unit }) {
   }, [halfL, halfW, offset, tickSize]);
 
   const showLabels = useQueueStore((state) => state.showLabels);
+  const isCapacityModalOpen = useCapacityExpansionStore((state) => state.isOpen);
+  const isSaveModalOpen = useQueueStore((state) => state.isSaveModalOpen);
+  const isPlansModalOpen = useQueueStore((state) => state.isPlansModalOpen);
 
-  // In Immersive mode or when showLabels is toggled OFF, hide dimension tape/labels
-  if (isImmersive || !showLabels) return null;
+  // In Immersive mode, when showLabels is toggled OFF, or when any modal is open, hide dimension tape/labels
+  if (isImmersive || !showLabels || isCapacityModalOpen || isSaveModalOpen || isPlansModalOpen) return null;
 
   const unitSuffix = UNIT_LABELS[unit] || 'm';
 

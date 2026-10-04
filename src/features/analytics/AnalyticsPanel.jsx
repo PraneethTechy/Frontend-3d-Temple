@@ -18,6 +18,7 @@ import {
 import { useQueueStore } from '../../store/useQueueStore.js';
 import { useSimulationStore } from '../simulation/simulationStore.js';
 import { SimulationControls } from '../simulation/SimulationControls.jsx';
+import { CrowdPressurePanel } from './CrowdPressurePanel.jsx';
 import { WaitTimeChart } from './WaitTimeChart.jsx';
 import { ThroughputChart } from './ThroughputChart.jsx';
 import { formatNumber } from '../../utils/units.js';
@@ -101,23 +102,43 @@ export function AnalyticsPanel() {
               </div>
 
               {/* 2. Utilization */}
-              <div className="p-2 rounded-xl bg-stone-50 border border-stone-200/70">
-                <span className="text-[10px] text-stone-500 font-medium block">Utilization</span>
-                <span className="text-sm font-bold text-stone-900 block mt-0.5">
-                  {staticMetrics.utilization || 0}%
-                </span>
-                <span className={`text-[9px] font-medium ${
-                  (staticMetrics.utilization || 0) > 85 ? 'text-rose-600' : 'text-emerald-600'
-                }`}>
-                  {(staticMetrics.utilization || 0) > 85 ? 'High load' : 'Optimal'}
-                </span>
-              </div>
+              {(() => {
+                const queueCap = staticMetrics.queueCapacity || 8752;
+                const liveUtilization = queueCap > 0
+                  ? Math.round(((metrics.visitorsInQueue || 0) / queueCap) * 100)
+                  : 0;
+                return (
+                  <div className="p-2 rounded-xl bg-stone-50 border border-stone-200/70">
+                    <span className="text-[10px] text-stone-500 font-medium block">Utilization</span>
+                    <span className="text-sm font-bold text-stone-900 block mt-0.5">
+                      {liveUtilization}%
+                    </span>
+                    <span className={`text-[9px] font-medium ${
+                      liveUtilization > 100
+                        ? 'text-rose-600 font-bold'
+                        : liveUtilization > 85
+                        ? 'text-rose-600'
+                        : liveUtilization > 0
+                        ? 'text-emerald-600'
+                        : 'text-stone-400'
+                    }`}>
+                      {liveUtilization > 100
+                        ? 'Over capacity'
+                        : liveUtilization > 85
+                        ? 'High load'
+                        : liveUtilization > 0
+                        ? 'Optimal'
+                        : 'Normal'}
+                    </span>
+                  </div>
+                );
+              })()}
 
               {/* 3. Wait */}
               <div className="p-2 rounded-xl bg-amber-50/40 border border-amber-200/60">
                 <span className="text-[10px] text-amber-800 font-medium block">Wait Time</span>
                 <span className="text-sm font-bold text-deva-maroon-800 block mt-0.5">
-                  {metrics.avgWaitMinutes || staticMetrics.estimatedWaitMinutes || 0} min
+                  {metrics.avgWaitMinutes !== undefined ? metrics.avgWaitMinutes : 0} min
                 </span>
                 <span className="text-[9px] text-stone-400">average dwell</span>
               </div>
@@ -126,7 +147,7 @@ export function AnalyticsPanel() {
               <div className="p-2 rounded-xl bg-amber-50/40 border border-amber-200/60">
                 <span className="text-[10px] text-amber-800 font-medium block">Throughput</span>
                 <span className="text-sm font-bold text-deva-maroon-800 block mt-0.5">
-                  {formatNumber(metrics.throughputPerHour || staticMetrics.hourlyThroughput || 0)}
+                  {formatNumber(metrics.throughputPerHour || 0)}
                 </span>
                 <span className="text-[9px] text-stone-400">devotees / hr</span>
               </div>
@@ -191,6 +212,9 @@ export function AnalyticsPanel() {
               </div>
             </div>
           </div>
+
+          {/* Real-Time Architectural Crowd Pressure & Capacity Alerts Engine */}
+          <CrowdPressurePanel />
 
           {/* Simulation Playback & Speed Controls */}
           <SimulationControls />

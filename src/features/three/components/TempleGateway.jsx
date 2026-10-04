@@ -1,6 +1,8 @@
 import React from 'react';
 import * as THREE from 'three';
 import { Html } from '@react-three/drei';
+import { useQueueStore } from '../../../store/useQueueStore.js';
+import { useCapacityExpansionStore } from '../../simulation/capacityExpansionStore.js';
 
 /**
  * Authentic Dravidian Temple Gateway / Torana Mandapam
@@ -11,6 +13,12 @@ export function TempleGateway({ component, isSelected }) {
   const length = dimensions.length || 10;
   const width = dimensions.width || 6;
   const height = dimensions.height || 7;
+  const storeShowLabels = useQueueStore((state) => state.showLabels);
+  const isCapacityModalOpen = useCapacityExpansionStore((state) => state.isOpen);
+  const isSaveModalOpen = useQueueStore((state) => state.isSaveModalOpen);
+  const isPlansModalOpen = useQueueStore((state) => state.isPlansModalOpen);
+  const isAnyModalOpen = isCapacityModalOpen || isSaveModalOpen || isPlansModalOpen;
+  const showLabels = !isAnyModalOpen && (storeShowLabels ?? true);
 
   const stoneColor = '#9E8265';
   const darkStone = '#5C4733';
@@ -63,12 +71,14 @@ export function TempleGateway({ component, isSelected }) {
       </mesh>
 
       {/* Label Badge */}
-      <Html position={[0, height + 1.8, 0]} center distanceFactor={30} zIndexRange={[100, 0]}>
-        <div className="pointer-events-none select-none px-2.5 py-1 rounded bg-deva-maroon-900/90 border border-amber-400/80 text-amber-200 font-bold text-[10px] tracking-wider shadow-lg flex items-center gap-1 whitespace-nowrap">
-          <span>TEMPLE GATEWAY</span>
-          <span className="text-[9px] text-amber-300 font-normal">| MANDAPAM</span>
-        </div>
-      </Html>
+      {showLabels && (
+        <Html position={[0, height + 1.8, 0]} center distanceFactor={30} zIndexRange={[100, 0]}>
+          <div className="pointer-events-none select-none px-2.5 py-1 rounded bg-deva-maroon-900/90 border border-amber-400/80 text-amber-200 font-bold text-[10px] tracking-wider shadow-lg flex items-center gap-1 whitespace-nowrap">
+            <span>TEMPLE GATEWAY</span>
+            <span className="text-[9px] text-amber-300 font-normal">| MANDAPAM</span>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

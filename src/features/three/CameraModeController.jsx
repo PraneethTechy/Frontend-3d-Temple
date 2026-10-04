@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Box, RotateCcw, Compass, Maximize2, Users, Landmark, Focus, ChevronUp } from 'lucide-react';
+import { Eye, Box, RotateCcw, Compass, Maximize2, Users, Landmark, Focus, ChevronUp, Sparkles, Flame } from 'lucide-react';
 import { useQueueStore } from '../../store/useQueueStore.js';
 
 export function CameraModeController() {
@@ -19,80 +19,90 @@ export function CameraModeController() {
       {/* Expandable Camera Presets Tray */}
       {showPresets && (
         <div className="flex items-center gap-1 p-1 bg-stone-900/90 backdrop-blur-md border border-stone-700/80 rounded-xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150 text-white">
+          {/* 1. OVERVIEW */}
           <button
-            id="btn-cam-fit-site"
-            onClick={() => focusCamera('fit_site')}
+            id="btn-cam-view-overview"
+            onClick={() => focusCamera('overview')}
             className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-stone-200 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-            title="Frame the entire site boundary"
+            title="Overview of the entire temple campus"
           >
             <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
-            <span>Fit Entire Site</span>
+            <span>Overview</span>
           </button>
 
+          {/* 2. ENTRANCE */}
           <button
-            id="btn-cam-fit-crowd"
-            onClick={() => focusCamera('fit_crowd')}
-            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-stone-200 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-            title="Frame holding, security, and queue system"
+            id="btn-cam-view-entrance"
+            onClick={() => focusCamera('entrance')}
+            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Entrance Gopuram and arrival forecourt"
+          >
+            <span>🛕 Entrance</span>
+          </button>
+
+          {/* 3. QUEUE */}
+          <button
+            id="btn-cam-view-queue"
+            onClick={() => focusCamera('queue')}
+            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-sky-400 hover:text-sky-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+            title="Queue channels and devotee movement"
           >
             <Users className="w-3.5 h-3.5 text-sky-400" />
-            <span>Fit Crowd System</span>
+            <span>Queue</span>
+          </button>
+
+          {/* 4. DARSHAN VIEW (Key Requirement) */}
+          <button
+            id="btn-cam-view-darshan"
+            onClick={() => focusCamera('darshan_view')}
+            className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-500/25 border border-amber-400/60 hover:bg-amber-500/35 text-amber-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Close view of incoming queue, sanctum portal & sacred deity"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Darshan View</span>
+          </button>
+
+          {/* 5. DARSHAN INTERIOR (Devotee Human Eye-Level Sacred Vista) */}
+          <button
+            id="btn-cam-view-darshan-interior"
+            onClick={() => focusCamera('darshan_interior')}
+            className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-amber-600/30 border border-amber-300/80 hover:bg-amber-600/40 text-amber-200 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Devotee eye-level perspective inside mandapa approach corridor and sanctum"
+          >
+            <Flame className="w-3.5 h-3.5 text-amber-300" />
+            <span>Darshan Interior</span>
+          </button>
+
+          {/* 5. SIMULATION */}
+          <button
+            id="btn-cam-view-simulation"
+            onClick={() => focusCamera('simulation')}
+            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Full simulation crowd operations view"
+          >
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Simulation</span>
           </button>
 
           <div className="w-[1px] h-4 bg-stone-700 mx-0.5" />
 
-          <button
-            id="btn-cam-focus-north"
-            onClick={() => focusCamera('focus_north_gopuram')}
-            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus camera on North Entrance Gopuram"
-          >
-            <span>🛕 North</span>
-          </button>
-
-          <button
-            id="btn-cam-focus-west"
-            onClick={() => focusCamera('focus_west_gopuram')}
-            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus camera on West Entrance Gopuram"
-          >
-            <span>🛕 West</span>
-          </button>
-
-          <button
-            id="btn-cam-focus-east"
-            onClick={() => focusCamera('focus_east_gopuram')}
-            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus camera on East Entrance Gopuram"
-          >
-            <span>🛕 East</span>
-          </button>
-
+          {/* Additional Architectural Presets */}
           <button
             id="btn-cam-focus-main-gopuram"
             onClick={() => focusCamera('focus_main_gopuram')}
-            className="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer font-bold"
-            title="Prominently showcase the 34m Raja Gopuram"
+            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Central Raja Gopuram"
           >
-            <span>🛕 Main</span>
-          </button>
-
-          <button
-            id="btn-cam-focus-darshan"
-            onClick={() => focusCamera('focus_darshan')}
-            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus on Darshan Sanctum / Vimana"
-          >
-            <span>🛕 Sanctum</span>
+            <span>👑 Raja Gopuram</span>
           </button>
 
           <button
             id="btn-cam-focus-south"
             onClick={() => focusCamera('focus_south_gopuram')}
-            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Focus camera on South Exit Gopuram"
+            className="px-2 py-1.5 rounded-lg text-[11px] font-semibold hover:bg-stone-800 text-emerald-300 hover:text-emerald-200 transition-colors flex items-center gap-1 cursor-pointer"
+            title="South Exit Gopuram"
           >
-            <span>🛕 South Exit</span>
+            <span>🚪 South Exit</span>
           </button>
 
           {selectedComponentId && (

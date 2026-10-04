@@ -11,3 +11,6 @@ export { SimulationControls } from './SimulationControls.jsx';
 export { SimulationAgents } from './SimulationAgents.jsx';
 export { SimulationPath } from './SimulationPath.jsx';
 export { SimulationHeatmap } from './SimulationHeatmap.jsx';
+export { LiveEntranceFlowPanel } from './LiveEntranceFlowPanel.jsx';
+export { DiversionApprovalModal } from './DiversionApprovalModal.jsx';
+export { DevoteeDetailPanel } from './DevoteeDetailPanel.jsx';

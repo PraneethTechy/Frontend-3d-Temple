@@ -28,8 +28,8 @@ export function SpaceInfoPanel() {
 
   const selectedComponent = scene.components?.find((c) => c.id === selectedComponentId);
 
-  // If a component is selected, render Component Properties
-  if (selectedComponent) {
+  // If a component is selected, render Component Properties ONLY in Manual Mode (Section 20)
+  if (selectedComponent && activeSidebarTab !== 'analysis') {
     return (
       <aside className="w-80 h-full bg-white/95 backdrop-blur-md border-l border-stone-200/80 flex flex-col flex-shrink-0 select-none shadow-soft z-20">
         <ComponentPropertyPanel component={selectedComponent} />

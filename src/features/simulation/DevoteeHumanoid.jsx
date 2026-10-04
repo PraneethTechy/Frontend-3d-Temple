@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { AGENT_STATES } from './simulationModel.js';
+import { useSimulationStore } from './simulationStore.js';
 
 // ============================================================================
 // PRE-ALLOCATED SHARED SINGLETON GEOMETRIES
@@ -144,6 +145,21 @@ const DARSHAN_HALO_MATERIAL = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide,
 });
 
+// Lightweight 3D Selection Ring and Indicator
+const SELECTION_RING_GEOM = new THREE.RingGeometry(0.38, 0.48, 24);
+const SELECTION_RING_MATERIAL = new THREE.MeshBasicMaterial({
+  color: '#0ea5e9',
+  transparent: true,
+  opacity: 0.9,
+  side: THREE.DoubleSide,
+});
+
+const SELECTION_ARROW_GEOM = new THREE.ConeGeometry(0.12, 0.28, 4);
+SELECTION_ARROW_GEOM.rotateX(Math.PI);
+const SELECTION_ARROW_MATERIAL = new THREE.MeshBasicMaterial({
+  color: '#0284c7',
+});
+
 /**
  * Realistic Stylized 3D Temple Visitor
  * Features natural human anatomy, authentic Indian temple attire (Kurta/Dhoti, Saree, Salwar),
@@ -212,7 +228,7 @@ export const DevoteeHumanoid = React.memo(function DevoteeHumanoid({ agent }) {
     if (!rootRef.current) return;
 
     // 1. Synchronize Position
-    rootRef.current.position.set(agent.position.x, 0, agent.position.z);
+    rootRef.current.position.set(agent.position.x, agent.position.y || 0, agent.position.z);
 
     // 2. Smooth Whole-Body Orientation toward Travel Heading (Point 7 & 8)
     const targetHeading = agent.targetHeading !== undefined ? agent.targetHeading : (agent.rotationY || 0);
@@ -357,8 +373,30 @@ export const DevoteeHumanoid = React.memo(function DevoteeHumanoid({ agent }) {
 
   const isFemale = gender === 'female';
 
+  const selectedDevoteeId = useSimulationStore((state) => state.selectedDevoteeId);
+  const selectDevotee = useSimulationStore((state) => state.selectDevotee);
+
+  const isSelected = Boolean(
+    selectedDevoteeId &&
+    (selectedDevoteeId === agent.logicalDevoteeId ||
+     selectedDevoteeId === agent.visitorRepresentativeId ||
+     selectedDevoteeId === agent.id)
+  );
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    selectDevotee(agent.logicalDevoteeId || agent.visitorRepresentativeId || agent.id);
+  };
+
   return (
-    <group ref={rootRef} scale={[scale, scale, scale]}>
+    <group ref={rootRef} scale={[scale, scale, scale]} onClick={handleClick}>
+      {/* Visual Selection Indicator Ring & Beacon */}
+      {isSelected && (
+        <group position={[0, 0.04, 0]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} geometry={SELECTION_RING_GEOM} material={SELECTION_RING_MATERIAL} />
+          <mesh position={[0, 2.05, 0]} geometry={SELECTION_ARROW_GEOM} material={SELECTION_ARROW_MATERIAL} />
+        </group>
+      )}
       {/* ==================================================================== */}
       {/* LEGS & FEET (Articulated at Hips Y = 0.80) */}
       {/* ==================================================================== */}
